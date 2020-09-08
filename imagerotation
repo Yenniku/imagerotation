@@ -1,0 +1,112 @@
+#################################################
+#                                               #
+#   Name: Will Hogan                            #
+#   Class: CSC-340-801 - Scientific Computing   #
+#   Date: 9/6/2020                              #
+#   Assignment: Lab 1 - Image Rotation          #
+#                                               #
+##################################################
+
+import cv2
+import numpy as np
+import math
+
+def degrees_into_rad(degree):
+    return degree*(math.pi/180)
+
+'''
+I'm not even using these methods :)
+
+def mult_matrix(matrix1,matrix2):
+    """
+    Multiplies two matrixes together
+    Mainly used to test if the method words
+    * uses the dot() method to multiply
+    :return: multiplied matrix
+    """
+
+    m = np.array(matrix1)
+    n = np.array(matrix2)
+
+    result = m.dot(n)
+    return result
+
+def rotate_matrix(matrix,theta):
+    """
+    Multiplies a given matrix with [[cos(x),-sin(x)],[sin(x),cos(x)] - where x is the theta
+    * uses the dot() method to multiply
+
+    :return: rotated matrix
+    """
+
+    m = np.array(matrix)
+    cos, sin = (math.cos(theta)), (math.sin(theta))
+    r = np.array((((cos,-sin),(sin, cos))))
+    result = m.dot(r)
+
+    return result
+'''
+
+# read in an image in opencv
+image = cv2.imread("cones1.png")
+
+# get size of an image
+height = image.shape[0] # height of image
+width = image.shape[1] # width of image
+
+print("image size: ", width, "x", height)
+
+### Resize the window to fit new rotation
+theta = degrees_into_rad(45)
+newWidth = int(abs(height * math.sin(theta)) + abs(width * math.cos(theta)))
+newHeight = int(abs(height * math.cos(theta)) + abs(width * math.sin(theta)))
+print ("New window to fit: ",newWidth,"x ",newHeight)
+
+### Create new window to fix rotated image
+emptyIm = np.zeros((newWidth,newHeight, 3), np.float32)
+
+### find the amount of pixels to move
+cy = height // 2        # find the center (Height)
+cx = width // 2         # find the center (Width)
+print("center coordinates of the image: ",cx,"x", cy)
+
+### Find how many pixels it takes to move to the center
+x_centered = int(((newWidth) // 2))
+y_centered = int((newHeight) // 2)
+print("center point of the entire window: ",x_centered," x ",y_centered)
+
+print("press 'Enter' to save and exit image\n")
+
+for r in range(height):     # height of the image, [y coordinates]
+    for c in range(width):  # width of the image, [x coordinates]
+
+        # Transitions pixels before rotating
+        transition_y = int(r - (height//2))
+        transition_x = int(c - (width//2))
+
+        # Rotates pixels
+        rotated_x = (transition_x * math.cos(theta) + (transition_y * -math.sin(theta)))
+        rotated_y = (transition_x * math.sin(theta) + (transition_y * math.cos(theta)))
+
+        # lazy way to turn them into integers
+        rotated_x = int(rotated_x)
+        rotated_y = int(rotated_y)
+
+        # translate new window[height][width] into original imgae[height][width]
+        emptyIm[rotated_y+(height//2)][rotated_x+(width//2)] = image[r][c]
+
+        ### at 45 degrees this is what I have add to make it center
+        # emptyIm[rotated_y+(height//2)+105][rotated_x+(width//2)+66] = image[r][c]
+
+
+# display an image created from scratch
+
+cv2.imshow("Displaying image",emptyIm/255)
+
+cv2.waitKey(0) # not going to proceed until you hit "Enter"
+cv2.destroyAllWindows() # closes all windows opened with "imshow"
+
+# save an image
+#cv2.imwrite("savedImage.png", emptyIm)
+#print("saved image as 'savedImage.png'")
+#theta = degrees_into_rad(80)
